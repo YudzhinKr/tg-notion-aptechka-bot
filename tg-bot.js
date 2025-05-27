@@ -1,11 +1,12 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
+const express = require('express'); // ✅ Додали express
 const notion = require('./notion');
 const addMedicineHandler = require('./handlers/addMedicine');
 const useMedicineHandler = require('./handlers/useMedicine');
 const replenishMedicineHandler = require('./handlers/replenishMedicine');
-const deleteMedicineHandler = require('./handlers/deleteMedicine'); // Підключаємо обробник видалення
-const checkInventoryHandler = require('./handlers/checkInventory'); // Підключаємо обробник перевірки
+const deleteMedicineHandler = require('./handlers/deleteMedicine');
+const checkInventoryHandler = require('./handlers/checkInventory');
 const searchMedicineHandler = require('./handlers/searchMedicine');
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
@@ -31,14 +32,14 @@ bot.onText(/\/start/, (msg) => {
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
-    console.log('Отримано повідомлення:', text); // Додайте цей рядок
+    console.log('Отримано повідомлення:', text);
 
     if (text === '➕ Додати ліки') {
         addMedicineHandler(bot, msg, userState, notion, mainKeyboard);
         return;
     }
 
-    if (msg.text === '➖ Використати ліки') {
+    if (text === '➖ Використати ліки') {
         await useMedicineHandler(bot, msg, userState, notion, mainKeyboard);
         return;
     }
@@ -52,19 +53,17 @@ bot.on('message', async (msg) => {
         await searchMedicineHandler(bot, msg, userState, notion, mainKeyboard);
         return;
     }
-    
 
     if (text === '🗑️ Видалити препарат') {
-        deleteMedicineHandler(bot, msg, userState, notion, mainKeyboard); // Викликаємо обробник видалення
+        deleteMedicineHandler(bot, msg, userState, notion, mainKeyboard);
         return;
     }
 
     if (text === '✅ Перевірити аптечку') {
-        checkInventoryHandler(bot, msg, userState, notion, mainKeyboard); // Викликаємо обробник перевірки
+        checkInventoryHandler(bot, msg, userState, notion, mainKeyboard);
         return;
     }
 
-    // Обробка введення даних залежно від поточного стану користувача
     if (userState[chatId]?.step) {
         switch (userState[chatId].step) {
             case 'назва':
@@ -81,7 +80,6 @@ bot.on('message', async (msg) => {
             case 'введення_кількості_поповнення':
                 replenishMedicineHandler(bot, msg, userState, notion, mainKeyboard);
                 break;
-            // Додамо обробку станів для видалення, якщо буде потрібно
             case 'підтвердження_видалення':
                 deleteMedicineHandler(bot, msg, userState, notion, mainKeyboard);
                 break;
@@ -91,31 +89,29 @@ bot.on('message', async (msg) => {
     }
 });
 
-// Обробник callback_query
 bot.on('callback_query', async (callbackQuery) => {
- 
-    if (callbackQuery.data && callbackQuery.data.startsWith('use_')) {
+    if (callbackQuery.data?.startsWith('use_')) {
         useMedicineHandler(bot, callbackQuery, userState, notion, mainKeyboard);
     }
-    if (callbackQuery.data && callbackQuery.data.startsWith('replenish_')) {
+    if (callbackQuery.data?.startsWith('replenish_')) {
         replenishMedicineHandler(bot, callbackQuery, userState, notion, mainKeyboard);
     }
-    // Додамо обробку callback_query для видалення та перевірки, якщо буде інлайн клавіатура
-    if (callbackQuery.data && callbackQuery.data.startsWith('delete_')) {
+    if (callbackQuery.data?.startsWith('delete_')) {
         deleteMedicineHandler(bot, callbackQuery, userState, notion, mainKeyboard);
     }
-
-    if (callbackQuery.data && callbackQuery.data.startsWith('search_medicine')) {
-        searchMedicineHandler(bot, callbackQuery, userState, notion, mainKeyboard);
-    }
-    if ( callbackQuery.data === 'search_by_category') {
-        searchMedicineHandler(bot, callbackQuery, userState, notion, mainKeyboard);
-    }
-    if (callbackQuery.data && callbackQuery.data.startsWith('category_')) {
+    if (callbackQuery.data?.startsWith('search_medicine') || callbackQuery.data === 'search_by_category' || callbackQuery.data.startsWith('category_')) {
         await searchMedicineHandler(bot, callbackQuery, userState, notion, mainKeyboard);
     }
-    
-    if (callbackQuery.data && callbackQuery.data === 'check_inventory') {
+    if (callbackQuery.data === 'check_inventory') {
         checkInventoryHandler(bot, callbackQuery, userState, notion, mainKeyboard);
     }
+});
+
+// ✅ Додаємо простий HTTP сервер, щоб Render бачив відкритий порт
+const app = express();
+app.get("/", (req, res) => res.send("🤖 Telegram bot is running"));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🌐 HTTP сервер працює на порту ${PORT}`);
 });
