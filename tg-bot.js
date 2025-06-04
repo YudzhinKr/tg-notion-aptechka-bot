@@ -1,6 +1,7 @@
+// tg-bot.js
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
-const express = require('express'); // ✅ Додали express
+const express = require('express');
 const notion = require('./notion');
 const addMedicineHandler = require('./handlers/addMedicine');
 const useMedicineHandler = require('./handlers/useMedicine');
@@ -8,6 +9,7 @@ const replenishMedicineHandler = require('./handlers/replenishMedicine');
 const deleteMedicineHandler = require('./handlers/deleteMedicine');
 const checkInventoryHandler = require('./handlers/checkInventory');
 const searchMedicineHandler = require('./handlers/searchMedicine');
+const { startScheduler } = require('./scheduler'); // <--- ДОДАЙ ЦЕЙ РЯДОК
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
@@ -107,7 +109,9 @@ bot.on('callback_query', async (callbackQuery) => {
     }
 });
 
-// ✅ Додаємо простий HTTP сервер, щоб Render бачив відкритий порт
+// Запускаємо планувальник після ініціалізації бота
+startScheduler(bot); // <--- ДОДАЙ ЦЕЙ РЯДОК
+
 const app = express();
 app.get("/", (req, res) => res.send("🤖 Telegram bot is running"));
 
