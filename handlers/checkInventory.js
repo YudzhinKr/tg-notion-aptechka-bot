@@ -31,13 +31,10 @@ const checkInventoryHandler = async (bot, receivedObject, userState, notion, mai
             }
 
             // Перевірка для таблеток, порошків, ін'єкцій (кількість <= 2)
-            if (type && ['Таблетки', 'Порошок', 'Ін\'єкція'].includes(type) && quantity <= expiringSoonThreshold && quantity > 0) {
+            if (type && ['Таблетки', 'Пігулки', 'Порошок', 'Ін\'єкція'].includes(type) && quantity <= expiringSoonThreshold && quantity > 0) {
                 expiringSoon.push(`🟡 ${name} (залишилось ${quantity})`);
             }
-            // Додаткова перевірка для всіх інших типів (кількість <= 1)
-            else if (quantity <= 1 && quantity > 0) {
-                expiringSoon.push(`🟡 ${name} (залишилось ${quantity})`);
-            }
+                    
             console.log(`Препарат: ${name}, Дата придатності (Notion): ${expiryDateProp}, Дата придатності (Moment): ${expiryDate ? expiryDate.format('YYYY-MM-DD') : 'немає'}, Поточна дата: ${now.format('YYYY-MM-DD')}`);
             if (expiryDate && expiryDate.isValid() && expiryDate.isBefore(now, 'day')) {
                 expired.push(`❌ ${name} (закінчився ${expiryDate.format('DD.MM.YYYY')})`);
