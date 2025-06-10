@@ -40,13 +40,13 @@ const checkExpiryDates = async () => {
 
                 if (expiryDate.isSameOrBefore(oneMonthFromNow) && expiryDate.isAfter(now)) {
                     const daysRemaining = expiryDate.diff(now, 'days');
-                    
+
                     let message = `⚠️ Нагадування: Термін придатності препарату *${name}* закінчується *${expiryDate.format('DD.MM.YYYY')}*! Залишилось *${daysRemaining}* днів.`;
-                
+
                     if (daysRemaining === 3) {
                         message = `🚨 *Термін майже вийшов!* Препарат *${name}* закінчується через *3 дні* — *${expiryDate.format('DD.MM.YYYY')}*!`;
                     }
-                
+
                     botInstance.sendMessage(TELEGRAM_CHAT_ID, message, { parse_mode: 'Markdown' });
                 }
             }
@@ -59,7 +59,7 @@ const checkExpiryDates = async () => {
 
 const startScheduler = (bot) => {
     setBotInstance(bot);
-    cron.schedule('0 9 */10 * *', checkExpiryDates, {
+    cron.schedule('0 9 * * *', checkExpiryDates, {
         timezone: "Europe/Kiev"
     });
     console.log('📅 Планувальник запущено (10, 20 та 30 числа кожного місяя о 9:00 за Києвом).');
