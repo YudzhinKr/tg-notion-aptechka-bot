@@ -115,7 +115,7 @@ startScheduler(bot);
 
 const app = express();
 app.get("/", (req, res) => res.send("🤖 Telegram bot is running"));
-
+app.get("/ping", (req, res) => res.status(200).send("ok"));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🌐 HTTP сервер працює на порту ${PORT}`);
