@@ -1,9 +1,9 @@
 {
   "name": "tg-notion-aptechka",
   "version": "1.0.0",
-  "main": "bot.js",
+  "main": "tg-bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node tg-bot.js"
   },
   "keywords": [],
   "author": "",
