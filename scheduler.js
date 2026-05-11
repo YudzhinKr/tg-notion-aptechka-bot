@@ -47,7 +47,7 @@ const checkExpiryDates = async () => {
                         message = `🚨 *Термін майже вийшов!* Препарат *${name}* закінчується через *3 дні* — *${expiryDate.format('DD.MM.YYYY')}*!`;
                     }
 
-                    botInstance.sendMessage(TELEGRAM_CHAT_ID, message, { parse_mode: 'Markdown' });
+                    botInstance.sendMessage(chatId, message, { parse_mode: 'Markdown' });
                 }
             }
         });
